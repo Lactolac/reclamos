@@ -1,5 +1,4 @@
 <template>
-  
   <div v-if="isAuthorized" class="container mt-5 px-3 position-relative">
     <div class="text-center mb-4">
       <img
@@ -32,14 +31,28 @@
           />
         </div>
         <div class="col-md-6">
-          <label for="noReclamo" class="form-label">No. de Reclamo</label>
-          <input
-            v-model="form.noReclamo"
-            type="text"
-            class="form-control readonly-field"
-            id="noReclamo"
-            readonly
-          />
+          <label for="noReclamo" class="form-label">No. de Reclamo <span class="text-danger">*</span></label>
+          <div class="input-group">
+            <input
+              v-model="form.noReclamo"
+              type="text"
+              class="form-control"
+              id="noReclamo"
+              :disabled="!isEditable"
+              :class="{'is-invalid': !form.noReclamo && isSubmitted}"
+              @keypress="handleKeyPress"
+              required
+            />
+            <button type="button" class="btn btn-outline-secondary" @click="enableEditing">
+              ...
+            </button>
+            <button type="button" class="btn btn-outline-secondary" @click="fetchReclamo">
+              <i class="pi pi-search"></i>
+            </button>
+          </div>
+          <div v-if="!form.noReclamo && isSubmitted" class="invalid-feedback">
+            Este campo es obligatorio.
+          </div>
         </div>
       </div>
       <div class="row mb-3">
@@ -66,194 +79,274 @@
       </div>
       <div class="row mb-3">
         <div class="col-md-6">
-          <label for="paisOrigen" class="form-label">País de Origen</label>
+          <label for="paisOrigen" class="form-label">País de Origen <span class="text-danger">*</span></label>
           <select
             v-model="form.paisOrigen"
             class="form-control"
             id="paisOrigen"
+            :class="{'is-invalid': !form.paisOrigen && isSubmitted}"
+            required
           >
             <option v-for="pais in paisOptions" :key="pais.pais" :value="pais.pais">
               {{ pais.pais }}
             </option>
           </select>
+          <div v-if="!form.paisOrigen && isSubmitted" class="invalid-feedback">
+            Este campo es obligatorio.
+          </div>
         </div>
         <div class="col-md-6">
-          <label for="rutaCliente" class="form-label">Ruta Cliente</label>
+          <label for="rutaCliente" class="form-label">Ruta Cliente <span class="text-danger">*</span></label>
           <select
             v-model="form.rutaCliente"
             class="form-control"
             id="rutaCliente"
+            :class="{'is-invalid': !form.rutaCliente && isSubmitted}"
+            required
           >
             <option v-for="ruta in rutaOptions" :key="ruta.ruta" :value="ruta.ruta">
               {{ ruta.ruta }}
             </option>
           </select>
+          <div v-if="!form.rutaCliente && isSubmitted" class="invalid-feedback">
+            Este campo es obligatorio.
+          </div>
         </div>
       </div>
       <div class="row mb-3">
         <div class="col-md-6">
-          <label for="contacto" class="form-label">Contacto</label>
+          <label for="contacto" class="form-label">Contacto <span class="text-danger">*</span></label>
           <input
             v-model="form.contacto"
             type="text"
             class="form-control"
             id="contacto"
+            :class="{'is-invalid': !form.contacto && isSubmitted}"
+            required
           />
+          <div v-if="!form.contacto && isSubmitted" class="invalid-feedback">
+            Este campo es obligatorio.
+          </div>
         </div>
         <div class="col-md-6">
-          <label for="telefono" class="form-label">Teléfono</label>
+          <label for="telefono" class="form-label">Teléfono <span class="text-danger">*</span></label>
           <input
             v-model="form.telefono"
             type="text"
             class="form-control"
             id="telefono"
+            :class="{'is-invalid': !form.telefono && isSubmitted}"
+            required
           />
+          <div v-if="!form.telefono && isSubmitted" class="invalid-feedback">
+            Este campo es obligatorio.
+          </div>
         </div>
         <div class="col-md-6">
-          <label for="talonario" class="form-label">Talonario</label>
+          <label for="talonario" class="form-label">Talonario <span class="text-danger">*</span></label>
           <input
             v-model="form.talonario"
             type="text"
             class="form-control"
             id="talonario"
+            :class="{'is-invalid': !form.talonario && isSubmitted}"
+            required
           />
+          <div v-if="!form.talonario && isSubmitted" class="invalid-feedback">
+            Este campo es obligatorio.
+          </div>
         </div>
       </div>
 
       <!-- Inicia productos -->
       <div class="col-md-6">
-          <label for="familiaProducto" class="form-label">Familia de Producto</label>
+          <label for="familiaProducto" class="form-label">Familia de Producto <span class="text-danger">*</span></label>
           <select
             v-model="form.familiaProducto"
             class="form-control"
             id="familiaProducto"
             @change="filterProductosByFamilia"
+            :class="{'is-invalid': !form.familiaProducto && isSubmitted}"
+            required
           >
             <option v-for="familia in familiaOptions" :key="familia.familia" :value="familia.familia">
               {{ familia.familia }}
             </option>
           </select>
+          <div v-if="!form.familiaProducto && isSubmitted" class="invalid-feedback">
+            Este campo es obligatorio.
+          </div>
         </div>
       <div class="row mb-3">
         <div class="col-md-6">
-          <label for="producto" class="form-label">Producto</label>
+          <label for="producto" class="form-label">Producto <span class="text-danger">*</span></label>
           <select
             v-model="form.producto"
             class="form-control"
             id="producto"
+            :class="{'is-invalid': !form.producto && isSubmitted}"
+            required
           >
             <option v-for="producto in filteredProductos" :key="producto.producto" :value="producto.producto">
               {{ producto.producto }}
             </option>
           </select>
+          <div v-if="!form.producto && isSubmitted" class="invalid-feedback">
+            Este campo es obligatorio.
+          </div>
         </div>
         <div class="col-md-6">
-          <label for="cantidad" class="form-label">Cantidad</label>
+          <label for="cantidad" class="form-label">Cantidad <span class="text-danger">*</span></label>
           <input
             v-model="form.cantidad"
             type="text"
             class="form-control"
             id="cantidad"
+            :class="{'is-invalid': !form.cantidad && isSubmitted}"
+            required
           />
+          <div v-if="!form.cantidad && isSubmitted" class="invalid-feedback">
+            Este campo es obligatorio.
+          </div>
         </div>
       </div>
       <div class="row mb-3">
         <div class="col-md-6">
-          <label for="uniMed" class="form-label">Unidad de Medida</label>
+          <label for="uniMed" class="form-label">Unidad de Medida <span class="text-danger">*</span></label>
           <select
             v-model="form.uniMed"
             class="form-control"
             id="uniMed"
+            :class="{'is-invalid': !form.uniMed && isSubmitted}"
+            required
           >
             <option v-for="uniMed in uniMedOptions" :key="uniMed.uni_med" :value="uniMed.uni_med">
               {{ uniMed.uni_med }}
             </option>
           </select>
+          <div v-if="!form.uniMed && isSubmitted" class="invalid-feedback">
+            Este campo es obligatorio.
+          </div>
         </div>
         <div class="col-md-6">
-          <label for="noLote" class="form-label">No. de Lote</label>
+          <label for="noLote" class="form-label">No. de Lote <span class="text-danger">*</span></label>
           <input
             v-model="form.noLote"
             type="text"
             class="form-control"
             id="noLote"
+            :class="{'is-invalid': !form.noLote && isSubmitted}"
+            required
           />
+          <div v-if="!form.noLote && isSubmitted" class="invalid-feedback">
+            Este campo es obligatorio.
+          </div>
         </div>
         <div class="col-md-6">
-          <label for="vencimiento" class="form-label">Fecha de Vencimiento</label>
+          <label for="vencimiento" class="form-label">Fecha de Vencimiento <span class="text-danger">*</span></label>
           <input
             v-model="form.vencimiento"
             type="date"
             class="form-control"
             id="vencimiento"
+            :class="{'is-invalid': !form.vencimiento && isSubmitted}"
+            required
           />
+          <div v-if="!form.vencimiento && isSubmitted" class="invalid-feedback">
+            Este campo es obligatorio.
+          </div>
         </div>
       </div>
       
       <!-- Inicia razon del reclamo -->
       <div class="row mb-3">
         <div class="col-md-6">
-          <label for="tipoOrigen" class="form-label">Tipo</label>
+          <label for="tipoOrigen" class="form-label">Tipo <span class="text-danger">*</span></label>
           <select
             v-model="form.tipoOrigen"
             class="form-control"
             id="tipoOrigen"
+            :class="{'is-invalid': !form.tipoOrigen && isSubmitted}"
+            required
           >
             <option v-for="tipo in tipoOptions" :key="tipo.tipo" :value="tipo.tipo">
               {{ tipo.tipo }}
             </option>
           </select>
+          <div v-if="!form.tipoOrigen && isSubmitted" class="invalid-feedback">
+            Este campo es obligatorio.
+          </div>
         </div>
         <div class="col-md-6">
-          <label for="razon" class="form-label">Razon</label>
+          <label for="razon" class="form-label">Razon <span class="text-danger">*</span></label>
           <select
             v-model="form.razon"
             class="form-control"
             id="categoria"
+            :class="{'is-invalid': !form.razon && isSubmitted}"
+            required
           >
             <option v-for="categoria in categoriaOptions" :key="categoria" :value="categoria">
               {{ categoria }}
             </option>
           </select>
+          <div v-if="!form.razon && isSubmitted" class="invalid-feedback">
+            Este campo es obligatorio.
+          </div>
         </div>
         <div class="mb-3">
-        <label for="descripcion" class="form-label">Descripción del Reclamo</label>
+        <label for="descripcion" class="form-label">Descripción del Reclamo <span class="text-danger">*</span></label>
         <select
             v-model="form.descripcion"
             class="form-control"
             id="descripcion"
+            :class="{'is-invalid': !form.descripcion && isSubmitted}"
+            required
           >
             <option v-for="reclamo in filteredReclamoOptions" :key="reclamo.reclamo" :value="reclamo.reclamo">
               {{ reclamo.reclamo }}
             </option>
           </select>
+          <div v-if="!form.descripcion && isSubmitted" class="invalid-feedback">
+            Este campo es obligatorio.
+          </div>
       </div>
       <div class="mb-3">
-        <label for="areaResponsable" class="form-label">Área Responsable</label>
+        <label for="areaResponsable" class="form-label">Área Responsable <span class="text-danger">*</span></label>
         <select
             v-model="form.areaResponsable"
             class="form-control"
             id="areaResponsable"
+            :class="{'is-invalid': !form.areaResponsable && isSubmitted}"
+            required
           >
             <option v-for="area in areaOptions" :key="area.area" :value="area.area">
               {{ area.area }}
             </option>
           </select>
+          <div v-if="!form.areaResponsable && isSubmitted" class="invalid-feedback">
+            Este campo es obligatorio.
+          </div>
       </div>
       </div>
       
       <!-- Inician comentarios -->
       <div class="mb-3">
-        <label for="comentario" class="form-label">Comentario</label>
+        <label for="comentario" class="form-label">Comentario <span class="text-danger">*</span></label>
         <textarea
           v-model="form.comentario"
           class="form-control"
           id="comentario"
           rows="3"
+          :class="{'is-invalid': !form.comentario && isSubmitted}"
+          required
         ></textarea>
+        <div v-if="!form.comentario && isSubmitted" class="invalid-feedback">
+          Este campo es obligatorio.
+        </div>
       </div>
       <div class="text-center">
-        <button type="submit" class="btn btn-primary me-4">Guardar</button>
+        <button type="submit" class="btn btn-primary me-4" @click="isSubmitted=true">Guardar</button>
         <button type="button" class="btn btn-secondary" @click="handleClear">
           Limpiar
         </button>
@@ -271,6 +364,8 @@ import Swal from 'sweetalert2';
 
 const authStore = useAuthStore();
 const isAuthorized = ref(false);
+const isSubmitted = ref(false);
+const isEditable = ref(false);
 const form = ref({
   fechaHora: "",
   creadoPor: "",
@@ -355,13 +450,36 @@ const reclamoOptions = ref([
 
 const uniMedOptions = ref([]);
 
-
 const handleSubmit = async () => {
   try {
     console.log("Form Values:", form.value);
-
-    const response = await axios.post("https://pg-api.yes.com.sv/insert", {
-      query: `
+    
+    const query = form.value.noReclamo
+      ? `
+        UPDATE general.zcapta_reclamos
+        SET
+          fecha = '${new Date().toISOString()}',
+          creado_por = '${form.value.creadoPor}',
+          estatus = '${form.value.estatus}',
+          pais = '${form.value.paisOrigen}',
+          ruta = '${form.value.rutaCliente}',
+          correlativo = '${form.value.talonario}',
+          contacto = '${form.value.contacto}',
+          telefono = '${form.value.telefono}',
+          producto = '${form.value.producto}',
+          cantidad = '${form.value.cantidad}',
+          uni_med = '${form.value.uniMed}',
+          tipo = '${form.value.tipoOrigen}',
+          razon = '${form.value.razon}',
+          familia = '${form.value.familiaProducto}',
+          no_lote = '${form.value.noLote}',
+          fecha_vencimiento = '${form.value.vencimiento ? form.value.vencimiento : null}',
+          reclamo = '${form.value.descripcion}',
+          area = '${form.value.areaResponsable}',
+          comentario = '${form.value.comentario}'
+        WHERE no_reclamo = '${form.value.noReclamo}'
+      `
+      : `
         INSERT INTO general.zcapta_reclamos (
           fecha, creado_por, no_reclamo, estatus, pais, ruta, correlativo, contacto, telefono, producto, cantidad, uni_med, tipo, razon, familia, no_lote, fecha_vencimiento, reclamo, area, comentario
         ) VALUES (
@@ -385,18 +503,25 @@ const handleSubmit = async () => {
           '${form.value.descripcion}', 
           '${form.value.areaResponsable}', 
           '${form.value.comentario}'
-        )`,
+        )`;
+
+    const response = await axios.post("https://pg-api.yes.com.sv/insert", {
+      query,
       db: {
         host: "192.168.103.55",
         database: "feldte"
       }
     });
+
     if (response.data.exito) {
       Swal.fire(
         'Éxito',
         'El formulario ha sido guardado con éxito.',
         'success'
-      );
+      ).then(() => {
+        handleClear(); // Limpiar el formulario después de guardar
+        incrementReclamoNumber(); // Incrementar el número de reclamo
+      });
     }
     console.log("Formulario guardado:", response.data);
   } catch (error) {
@@ -405,11 +530,23 @@ const handleSubmit = async () => {
 };
 
 const handleClear = () => {
+  const preservedValues = {
+    noReclamo: form.value.noReclamo,
+    creadoPor: form.value.creadoPor,
+    fechaHora: form.value.fechaHora,
+  };
+
   Object.keys(form.value).forEach((key) => {
     form.value[key] = "";
   });
+
   form.value.estatus = "ABIERTO"; // Restablecer el estado predeterminado
-  form.value.noReclamo = currentReclamoNumber++; // Incrementar el número de reclamo
+
+  Object.assign(form.value, preservedValues); // Restaurar los valores preservados
+};
+
+const incrementReclamoNumber = () => {
+  form.value.noReclamo = parseInt(form.value.noReclamo) + 1;
 };
 
 const handleLogout = async () => {
@@ -450,6 +587,7 @@ const filterProductosByFamilia = () => {
 const filteredReclamoOptions = computed(() => {
   return reclamoOptions.value.filter(reclamo => reclamo.categoria === form.value.razon);
 });
+
 const getLastReclamoNumber = async () => {
   try {
     const response = await axios.post("https://pg-api.yes.com.sv/select", {
@@ -465,6 +603,68 @@ const getLastReclamoNumber = async () => {
     return 0;
   }
 };
+
+const enableEditing = () => {
+  isEditable.value = true;
+};
+
+const fetchReclamo = async () => {
+  enableEditing();
+  try {
+    const response = await axios.post("https://pg-api.yes.com.sv/select", {
+      query: `SELECT * FROM general.zcapta_reclamos WHERE no_reclamo = '${form.value.noReclamo}' AND estatus = 'ABIERTO';`,
+      db: {
+        host: "192.168.103.55",
+        database: "feldte"
+      }
+    });
+
+    if (response.data.length > 0) {
+      const data = response.data[0];
+      const now = new Date();
+      form.value = {
+        ...form.value,
+        fechaHora: `${now.toLocaleDateString("es-ES")} ${now.toLocaleTimeString("es-ES", { hour12: false })}`,
+        creadoPor: data.creado_por,
+        noReclamo: data.no_reclamo,
+        estatus: data.estatus,
+        paisOrigen: data.pais,
+        rutaCliente: data.ruta,
+        talonario: data.correlativo,
+        contacto: data.contacto,
+        telefono: data.telefono,
+        producto: data.producto,
+        cantidad: data.cantidad,
+        uniMed: data.uni_med,
+        tipoOrigen: data.tipo,
+        razon: data.razon,
+        familiaProducto: data.familia,
+        noLote: data.no_lote,
+        vencimiento: data.fecha_vencimiento,
+        descripcion: data.reclamo,
+        areaResponsable: data.area,
+        comentario: data.comentario,
+      };
+
+      // Set the familiaProducto to match the product's family
+      form.value.familiaProducto = data.familia;
+      filterProductosByFamilia();
+
+    } else {
+      Swal.fire('Error', 'No se encontró un reclamo con ese id o el reclamo no está abierto.', 'error');
+    }
+  } catch (error) {
+    console.error("Error fetching reclamo:", error);
+  }
+};
+
+const handleKeyPress = (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault(); // Prevent form submission
+    fetchReclamo();
+  }
+};
+
 onMounted(async () => {
   authStore.loadSession();
   if (authStore.isAuthenticated() && authStore.hasGroup('CaptaReclamo')) {
