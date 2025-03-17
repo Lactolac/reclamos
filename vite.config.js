@@ -14,7 +14,7 @@ export default defineConfig({
     host: '0.0.0.0', // Escucha en todas las interfaces de red
     port: 5173, // Puedes cambiar el puerto si es necesario
     allowedHosts: [
-      'zdownload.yes.com.sv' // Permitir solicitudes desde este dominio
+      'reclamos.yes.com.sv' // Permitir solicitudes desde este dominio
     ]
   },
 })
