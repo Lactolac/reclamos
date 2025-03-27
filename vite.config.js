@@ -15,6 +15,13 @@ export default defineConfig({
     port: 5173, // Puedes cambiar el puerto si es necesario
     allowedHosts: [
       'reclamos.yes.com.sv' // Permitir solicitudes desde este dominio
-    ]
+    ],
+    proxy: {
+      '/api': {
+        target: 'http://localhost:9000', // URL del servidor al que deseas hacer proxy
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '') // Reescribe la ruta eliminando el prefijo /api
+      }
+    }
   },
 })

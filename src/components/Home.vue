@@ -408,6 +408,20 @@
           Este campo es obligatorio.
         </div>
       </div>
+
+      <!-- Campo para subir una foto -->
+      <div class="mb-3">
+        <label for="foto" class="form-label"
+          >Subir Foto</label
+        >
+        <input
+          type="file"
+          class="form-control"
+          id="foto"
+          @change="handleFileChange"
+        />
+      </div>
+
       <div class="text-center">
         <button
           type="submit"
@@ -457,6 +471,7 @@ const form = ref({
   areaResponsable: "",
   comentario: "",
 });
+const foto = ref(null);
 
 const productos = ref([]);
 const filteredProductos = ref([]);
@@ -518,6 +533,10 @@ const reclamoOptions = ref([
 ]);
 
 const uniMedOptions = ref([]);
+
+const handleFileChange = (event) => {
+  foto.value = event.target.files[0];
+};
 
 const handleSubmit = async () => {
   try {
@@ -592,14 +611,39 @@ const handleSubmit = async () => {
     });
 
     if (response.data.exito) {
-      Swal.fire(
-        'Éxito',
-        'El formulario ha sido guardado con éxito.',
-        'success'
-      ).then(() => {
-        handleClear(); // Limpiar el formulario después de guardar
-        incrementReclamoNumber(); // Incrementar el número de reclamo
-      });
+      if (foto.value) {
+        const formData = new FormData();
+        formData.append('foto', foto.value);
+        formData.append('no_reclamo', form.value.noReclamo);
+
+        const uploadResponse = await axios.post("/api/subirfoto", formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        if (uploadResponse.data.exito) {
+          Swal.fire(
+            'Éxito',
+            'El formulario y la foto han sido guardados con éxito.',
+            'success'
+          ).then(() => {
+            handleClear(); // Limpiar el formulario después de guardar
+            incrementReclamoNumber(); // Incrementar el número de reclamo
+          });
+        } else {
+          Swal.fire('Error', uploadResponse.data.mensaje, 'error');
+        }
+      } else {
+        Swal.fire(
+          'Éxito',
+          'El formulario ha sido guardado con éxito.',
+          'success'
+        ).then(() => {
+          handleClear(); // Limpiar el formulario después de guardar
+          incrementReclamoNumber(); // Incrementar el número de reclamo
+        });
+      }
     }
     console.log("Formulario guardado:", response.data);
   } catch (error) {
@@ -621,6 +665,7 @@ const handleClear = () => {
   form.value.estatus = "ABIERTO"; // Restablecer el estado predeterminado
 
   Object.assign(form.value, preservedValues); // Restaurar los valores preservados
+  foto.value = null;
 };
 
 const incrementReclamoNumber = () => {
