@@ -18,7 +18,7 @@ export default defineConfig({
     ],
     proxy: {
       '/api': {
-        target: 'http://localhost:9000', // URL del servidor al que deseas hacer proxy
+        target: 'https://newcapta.yes.com.sv', // URL del servidor al que deseas hacer proxy
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '') // Reescribe la ruta eliminando el prefijo /api
       }
