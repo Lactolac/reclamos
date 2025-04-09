@@ -615,8 +615,8 @@ const handleSubmit = async () => {
         const formData = new FormData();
         formData.append('foto', foto.value);
         formData.append('no_reclamo', form.value.noReclamo);
-
-        const uploadResponse = await axios.post("/api/subirfoto", formData, {
+        
+        const uploadResponse = await axios.post("https://newcapta.yes.com.sv/api/subirfoto", formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }

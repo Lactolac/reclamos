@@ -1,0 +1,7 @@
+{
+  "name": "reclamoslactolac",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "custom"
+}
